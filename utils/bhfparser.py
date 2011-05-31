@@ -8,6 +8,9 @@ from urllib2 import URLError
 from datetime import datetime, date, time
 from BeautifulSoup import BeautifulSoup
 
+from railware.zug import Zug
+from railware.profileintrag import Profileintrag
+from railware.verspaetung import Verspaetung
 
 # TODO
 # URL-Parameter "REQ0JourneyStopsSID" evtl genauer als "input".
@@ -55,7 +58,7 @@ class BhfParser:
         """
         self.bhf = bhf
         # Url aus dem Template erzeugen
-        self.url = URL_TEMPLATE % urllib2.quote(self.bhf.get_name())
+        self.url = URL_TEMPLATE % urllib2.quote(self.bhf.get_uname())
 
     def __str__(self):
         """
@@ -114,7 +117,7 @@ class BhfParser:
                 self.print_debug(late, current_time, ontime, sleep_sec)
                 # TODO <<<
                 
-                #self.process_profileintraege(current_time, late, ontime)
+                self.process_profileintraege(current_time, late, ontime)
 
                 gevent.sleep(sleep_sec)
         except GreenletExit:
@@ -181,11 +184,8 @@ class BhfParser:
                 # Mit naechster Zeile fortfahren
                 continue
 
-            # Zugnamen ohne Leerzeichen speichern
-            # train_name = ''.join(row('td', 'train')[1].text.split())
             match = ZUG_REGEX.search(row('td', 'train')[1].text)
             train_name = (match.group('typ'), match.group('nr'),)
-            # TODO Zugnamen in Typ und Nummer splitten
             if late_flag:
                 late.append((row_time, train_name))
             else:
@@ -193,8 +193,16 @@ class BhfParser:
         return (current_time, late, ontime)
 
     def process_profileintraege(self, current_time, late, ontime):
-        pass
-        
+        for ankunft, data in ontime[0:5]:
+            typ, nr = data
+            zug = Zug(typ, nr)
+            Profileintrag(self.bhf, zug, ankunft)
+        for ankunft, data in late:
+            typ, nr = data
+            delta = int((current_time - ankunft).total_seconds() / 60)
+            zug = Zug(typ, nr)
+            profil = Profileintrag(self.bhf, zug, ankunft)
+            Verspaetung(profil, delta)
 
     # TODO >>> debug
     def print_debug(self, late, current_time, ontime, sleep_sec):

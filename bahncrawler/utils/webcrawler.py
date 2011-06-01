@@ -5,15 +5,15 @@ monkey.patch_all()
 from bahncrawler.strecke import Strecke
 from bahncrawler.bahnhof import Bahnhof
 from bahncrawler.utils.bhfparser import BhfParser
-from bahncrawler.utils.db import connection
+from bahncrawler.utils.conf import settings
 
 
 class WebCrawler(object):
 
-    def __init__(self, poll_int):
+    def __init__(self):
         self.active_strecke = None
         self.current_strecke = None
-        self.intervall = poll_int
+        self.intervall = settings['check_intervall']
 
     def run(self):
         self.active_strecke = Strecke.get_latest_strecke()

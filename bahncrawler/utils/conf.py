@@ -1,5 +1,3 @@
-
-
 class Settings(dict):
 
     def __init__(self):
@@ -8,7 +6,8 @@ class Settings(dict):
             ('dbport', 3306),
             ('dbuser', 'crawler'),
             ('dbpassword', 'railware'),
-            ('dbname', 'swenp01'),))
+            ('dbname', 'swenp01'),
+            ('check_interval', 60),))
 
     def set_from_namespace(self, ns):
         pass

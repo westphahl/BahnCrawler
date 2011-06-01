@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-from utils.webcrawler import WebCrawler
+
+from bahncrawler.utils.webcrawler import WebCrawler
 
 # Polling Intervall fuer die Pruefung auf neue Strecke
 INTERVALL_STRECKE = 60

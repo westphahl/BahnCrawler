@@ -8,20 +8,16 @@ from urllib2 import URLError
 from datetime import datetime, date, time
 from BeautifulSoup import BeautifulSoup
 
-from railware.zug import Zug
-from railware.profileintrag import Profileintrag
-from railware.verspaetung import Verspaetung
-
-# TODO
-# URL-Parameter "REQ0JourneyStopsSID" evtl genauer als "input".
-# entspricht "id" aus dem AJAX-Request ...
+from bahncrawler.zug import Zug
+from bahncrawler.profileintrag import Profileintrag
+from bahncrawler.verspaetung import Verspaetung
 
 """
 URL-Templage mit GET-Parametern zur Abfrage der Ankuenfte
 
 Query-Parameter (alle zwingend!):
 rt=1                    ->  Funktion unbekannt
-input=%s                ->  Name des Bahnhofs (muss gueltig sein)
+input=%s                ->  UID des Bahnhofs
 boardType=arr           ->  Ankuenfte anzeigen
 time=actual             ->  momentane Zeit verwenden
 productFilter=11110     ->  Bitmap (1=on/0=off)

@@ -1,5 +1,5 @@
 import MySQLdb
-from utils.db import Connection
+from bahncrawler.utils.db import connection
 
 GET_SQL = "SELECT sid from Strecken WHERE status = 1 ORDER BY erstelltAm DESC LIMIT 1"
 
@@ -7,7 +7,7 @@ GET_SQL = "SELECT sid from Strecken WHERE status = 1 ORDER BY erstelltAm DESC LI
 class Strecke(object):
 
     def __init__(self, id):
-        self.cursor = Connection.get_cursor()
+        self.cursor = connection.get_cursor()
         self.status_code = 1
         self.id = id
 
@@ -22,7 +22,7 @@ class Strecke(object):
 
     @classmethod
     def get_latest_strecke(cls):
-        cursor = Connection.get_cursor()
+        cursor = connection.get_cursor()
         try:
             cursor.execute(GET_SQL)
             if cursor.rowcount == 0:

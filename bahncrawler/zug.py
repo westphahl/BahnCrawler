@@ -1,5 +1,5 @@
 import MySQLdb
-from utils.db import Connection
+from bahncrawler.utils.db import connection
 
 INSERT_SQL = "INSERT INTO Zuege (typ, nummer) VALUES ('%s', '%s')"
 GET_SQL = "SELECT zid, typ, nummer FROM Zuege WHERE typ = '%s' AND nummer = '%s'"
@@ -8,7 +8,7 @@ GET_SQL = "SELECT zid, typ, nummer FROM Zuege WHERE typ = '%s' AND nummer = '%s'
 class Zug(object):
 
     def __init__(self, typ, nr):
-        self.cursor = Connection.get_cursor()
+        self.cursor = connection.get_cursor()
         try:
             self.cursor.execute(GET_SQL % (typ, nr))
             if self.cursor.rowcount == 0:

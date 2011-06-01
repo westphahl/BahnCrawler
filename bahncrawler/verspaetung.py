@@ -1,7 +1,7 @@
 from datetime import date
 import MySQLdb
 
-from utils.db import Connection
+from bahncrawler.utils.db import connection
 
 INSERT_SQL = "INSERT INTO Verspaetungen (pid_fk, minuten, datum) VALUES (%s, %s, '%s')"
 GET_SQL = "SELECT vid FROM Verspaetungen WHERE pid_fk = %s AND datum = '%s'"
@@ -11,7 +11,7 @@ UPDATE_SQL = "UPDATE Verspaetungen SET minuten = %s WHERE pid_fk = %s AND datum 
 class Verspaetung(object):
 
     def __init__(self, profil, minuten):
-        self.cursor = Connection.get_cursor()
+        self.cursor = connection.get_cursor()
         try:
             today = date.today()
             self.cursor.execute(GET_SQL % (profil.get_id(), today.isoformat()))

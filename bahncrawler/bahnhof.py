@@ -1,5 +1,5 @@
 import MySQLdb
-from utils.db import Connection
+from bahncrawler.utils.db import connection
 
 GET_SQL = "SELECT bid, name, uname FROM Bahnhoefe WHERE sid_fk = %s"
 
@@ -11,7 +11,7 @@ class Bahnhof(object):
         self.name = name
         self.uname = uname
         self.strecke = strecke
-        self.cursor = Connection.get_cursor()
+        self.cursor = connection.get_cursor()
 
     def __del__(self):
         self.cursor.close()
@@ -30,7 +30,7 @@ class Bahnhof(object):
 
     @classmethod
     def get_all_for_strecke(cls, strecke):
-        cursor = Connection.get_cursor()
+        cursor = connection.get_cursor()
         try:
             cursor.execute(GET_SQL % long(strecke.id))
             if cursor.rowcount == 0:

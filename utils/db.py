@@ -14,9 +14,12 @@ class Connection(object):
 
     @classmethod
     def get_cursor(cls):
-        if cls.con == None:
-            cls.con = MySQLdb.connect(host, user, password, dbname)
-        return cls.con.cursor()
+        try:
+            if cls.con == None:
+                cls.con = MySQLdb.connect(host, user, password, dbname)
+            return cls.con.cursor()
+        except MySQLdb.OperationalError, e:
+            print("MySQL Error: %s" % str(e))
 
     @classmethod
     def close(cls):

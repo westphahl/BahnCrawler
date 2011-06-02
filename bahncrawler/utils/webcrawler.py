@@ -1,7 +1,7 @@
 import gevent
 from gevent import monkey
 monkey.patch_all()
-import sys
+import logging
 
 from bahncrawler.strecke import Strecke
 from bahncrawler.bahnhof import Bahnhof
@@ -23,33 +23,28 @@ class WebCrawler(object):
         while True:
             try:
                 if (self.current_strecke == self.active_strecke):
+                    logging.debug("Keine neuere Strecke gefunden")
                     gevent.sleep(self.interval)
+                elif (self.current_strecke == None):
+                    logging.info("Keine Strecke in der Datenbank")
                 else:
+                    logging.debug("Neue Strecke gefunden")
                     self.quit_all_parsers()
                     self.active_strecke = self.current_strecke
                     self.start_all_parsers()
-                print("-" * 60 )
-                sys.stdout.write("WebCrawler: Suche nach neuer Strecke... ")
+                logging.info("Suche nach neuer Strecke")
                 self.current_strecke = Strecke.get_latest_strecke()
-                sys.stdout.write("Done.\n")
             except KeyboardInterrupt:
                 return 0
 
-
     def start_all_parsers(self):
-        print("-" * 60)
-        sys.stdout.write("WebCrawler: Starte alle Parser... ")
+        logging.info("Starte alle Parser")
         bhf_list = Bahnhof.get_all_for_strecke(self.active_strecke)
         # Parser-Instanzen erzeugen
         parser_list = [BhfParser(bhf) for bhf in bhf_list]
         # Jeden Parser in eigenem Thread ausfuehren
         self.jobs = [gevent.spawn(parser) for parser in parser_list]
-        sys.stdout.writelines("Done.\n")
-
 
     def quit_all_parsers(self):
-        print("-" * 60)
-        sys.stdout.write("WebCrawler: Beende alle Parser... ")
+        logging.info("Beende alle Parser")
         gevent.killall(self.jobs)
-        sys.stdout.writelines("Done.\n")
-

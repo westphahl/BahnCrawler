@@ -18,11 +18,15 @@ if __name__ == '__main__':
     parser.add_argument('--db', '-d', required=True, dest='dbname')
     parser.add_argument('--interval', '-i', default=60, type=int)
     parser.add_argument('--prefix', default='')
-    # parser.add_argument('--level', '-l', default='')
+    parser.add_argument('--level', '-l', default='info',
+            choices=['debug', 'info', 'warning', 'error', 'critical',],
+            help="set the log level")
 
     ns = parser.parse_args()
     settings.set_from_namespace(ns)
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(
+            format='%(levelname)s:%(module)s:%(message)s',
+            level=settings['level'].upper())
 
     from bahncrawler.utils.webcrawler import WebCrawler
     c = WebCrawler()

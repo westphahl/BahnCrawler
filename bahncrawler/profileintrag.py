@@ -1,11 +1,12 @@
 from datetime import datetime
 import MySQLdb
 
+from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-INSERT_SQL = "INSERT INTO Profileintraege (bid_fk, zid_fk, geplanteAnkunft, erstelltAm, aktualisiertAm) VALUES (%s, %s, '%s', '%s', '%s')"
-GET_SQL = "SELECT pid FROM Profileintraege WHERE bid_fk = %s AND zid_fk = %s"
-UPDATE_SQL = "UPDATE Profileintraege SET aktualisiertAm = '%s' WHERE pid = %s"
+INSERT_SQL = "INSERT INTO " + settings['prefix'] + "Profileintraege (bid_fk, zid_fk, geplanteAnkunft, erstelltAm, aktualisiertAm) VALUES (%s, %s, '%s', '%s', '%s')"
+GET_SQL = "SELECT pid FROM " + settings['prefix'] + "Profileintraege WHERE bid_fk = %s AND zid_fk = %s"
+UPDATE_SQL = "UPDATE " + settings['prefix'] + "Profileintraege SET aktualisiertAm = '%s' WHERE pid = %s"
 
 
 class Profileintrag(object):

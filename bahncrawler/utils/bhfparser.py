@@ -193,6 +193,7 @@ class BhfParser:
             typ, nr = data
             zug = Zug(typ, nr)
             Profileintrag(self.bhf, zug, ankunft)
+
         for ankunft, data in late:
             typ, nr = data
             delta = int((current_time - ankunft).total_seconds() / 60)
@@ -202,7 +203,7 @@ class BhfParser:
 
     # TODO >>> debug
     def print_debug(self, late, current_time, ontime, sleep_sec):
-        print("-" * 50)
+        print("-" * 60)
         print("> %s (Arrivals) @ %sh" %
                 (self.bhf.get_name(), current_time.strftime('%H:%M')))
         print("Late: %s - On Time: %s - Next query in: %s sec" %

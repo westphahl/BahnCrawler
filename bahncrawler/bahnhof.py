@@ -1,7 +1,9 @@
 import MySQLdb
+
+from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-GET_SQL = "SELECT bid, name, uname FROM Bahnhoefe WHERE sid_fk = %s"
+GET_SQL = "SELECT bid, name, uname FROM " + settings['prefix'] + "Bahnhoefe WHERE sid_fk = %s"
 
 
 class Bahnhof(object):

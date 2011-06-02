@@ -8,9 +8,9 @@ class Connection(object):
     def __init__(self):
         try:
             self.con = MySQLdb.connect(
-                    settings['dbhost'],
-                    settings['dbuser'],
-                    settings['dbpassword'],
+                    settings['host'],
+                    settings['user'],
+                    settings['password'],
                     settings['dbname'])
         except MySQLdb.OperationalError, e:
             print("MySQL Error: %s" % str(e))

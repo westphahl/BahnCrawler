@@ -1,12 +1,29 @@
 #!/usr/bin/env python
 
 import sys
+import logging
+import argparse
 
-from bahncrawler.utils.webcrawler import WebCrawler
+from bahncrawler.utils.conf import settings
 
-# Polling Intervall fuer die Pruefung auf neue Strecke
-INTERVALL_STRECKE = 60
 
 if __name__ == '__main__':
-    wc = WebCrawler(INTERVALL_STRECKE)
-    sys.exit(wc.run())
+    parser = argparse.ArgumentParser(
+        description="Webcrawler zum Erfassen von Verspaetungen der Bahn.")
+
+    parser.add_argument('--host', default='127.0.0.1')
+    parser.add_argument('--port', default=3306, type=int)
+    parser.add_argument('--user', '-u', required=True)
+    parser.add_argument('--password', '-p', required=True)
+    parser.add_argument('--db', '-d', required=True, dest='dbname')
+    parser.add_argument('--interval', '-i', default=60, type=int)
+    parser.add_argument('--prefix', default='')
+    # parser.add_argument('--level', '-l', default='')
+
+    ns = parser.parse_args()
+    settings.set_from_namespace(ns)
+    logging.basicConfig(level=logging.DEBUG)
+
+    from bahncrawler.utils.webcrawler import WebCrawler
+    c = WebCrawler()
+    sys.exit(c.run())

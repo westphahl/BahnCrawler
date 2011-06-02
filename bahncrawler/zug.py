@@ -1,8 +1,10 @@
 import MySQLdb
+
+from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-INSERT_SQL = "INSERT INTO Zuege (typ, nummer) VALUES ('%s', '%s')"
-GET_SQL = "SELECT zid, typ, nummer FROM Zuege WHERE typ = '%s' AND nummer = '%s'"
+INSERT_SQL = "INSERT INTO " + settings['prefix'] + "Zuege (typ, nummer) VALUES ('%s', '%s')"
+GET_SQL = "SELECT zid, typ, nummer FROM " + settings['prefix'] + "Zuege WHERE typ = '%s' AND nummer = '%s'"
 
 
 class Zug(object):

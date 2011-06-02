@@ -1,7 +1,9 @@
 import MySQLdb
+
+from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-GET_SQL = "SELECT sid from Strecken WHERE status = 1 ORDER BY erstelltAm DESC LIMIT 1"
+GET_SQL = "SELECT sid from " + settings['prefix'] + "Strecken WHERE status = 1 ORDER BY erstelltAm DESC LIMIT 1"
 
 
 class Strecke(object):

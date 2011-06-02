@@ -3,6 +3,7 @@ from gevent import monkey, GreenletExit
 monkey.patch_all()
 
 import re
+import logging
 import urllib2
 from urllib2 import URLError
 from datetime import datetime, date, time
@@ -109,10 +110,7 @@ class BhfParser:
                     """
                     sleep_sec = 60*60
 
-                # TODO >>> debug
-                self.print_debug(late, current_time, ontime, sleep_sec)
-                # TODO <<<
-                
+                self.log(late, current_time, ontime, sleep_sec)
                 self.process_profileintraege(current_time, late, ontime)
 
                 gevent.sleep(sleep_sec)
@@ -201,21 +199,18 @@ class BhfParser:
             profil = Profileintrag(self.bhf, zug, ankunft)
             Verspaetung(profil, delta)
 
-    # TODO >>> debug
-    def print_debug(self, late, current_time, ontime, sleep_sec):
-        print("-" * 60)
-        print("> %s (Arrivals) @ %sh" %
-                (self.bhf.get_name(), current_time.strftime('%H:%M')))
-        print("Late: %s - On Time: %s - Next query in: %s sec" %
-                (len(late), len(ontime), sleep_sec))
+    def log(self, late, current_time, ontime, sleep_sec):
+        logging.info("%s (Arrivals) @ %sh",
+                self.bhf.get_name(), current_time.strftime('%H:%M'))
+        logging.debug("Late: %s - On Time: %s - Next query in: %s sec",
+                len(late), len(ontime), sleep_sec)
         if (len(ontime) > 0):
-            print("Next arrival: %s @ %sh - %s min to go" % (
-            ontime[0][1],
-            ontime[0][0].strftime('%H:%M'),
-            int((ontime[0][0]- current_time).total_seconds() / 60)))
+            logging.debug("Next arrival: %s @ %sh - %s min to go",
+                    ontime[0][1],
+                    ontime[0][0].strftime('%H:%M'),
+                    int((ontime[0][0]- current_time).total_seconds() / 60))
         for arrival, train in late:
-            print("%s @ %sh - Late: %s min" % (
-                train,
-                arrival.strftime('%H:%M'),
-                int((current_time - arrival).total_seconds() / 60)))
-    # TODO <<<
+            logging.debug("%s @ %sh - Late: %s min",
+                    train,
+                    arrival.strftime('%H:%M'),
+                    int((current_time - arrival).total_seconds() / 60))

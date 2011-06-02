@@ -25,7 +25,7 @@ if __name__ == '__main__':
     ns = parser.parse_args()
     settings.set_from_namespace(ns)
     logging.basicConfig(
-            format='%(levelname)s:%(module)s:%(message)s',
+            format='%(levelname)s:%(module)s: %(message)s',
             level=settings['level'].upper())
 
     from bahncrawler.utils.webcrawler import WebCrawler

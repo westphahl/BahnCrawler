@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 import MySQLdb
 
@@ -28,7 +29,7 @@ class Verspaetung(object):
                     today.isoformat()))
             self.cursor.execute(GET_SQL % (profil.get_id(), today.isoformat()))
         except MySQLdb.Error, e:
-            print("MySQL Error: %s" % str(e))
+            logging.error("MySQL Error: %s" % str(e))
 
     def __del__(self):
         self.cursor.close()

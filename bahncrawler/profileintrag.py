@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 import MySQLdb
 
@@ -31,7 +32,7 @@ class Profileintrag(object):
             self.cursor.execute(GET_SQL % (bahnhof.get_id(), zug.get_id()))
             self.id = self.cursor.fetchone()[0]
         except MySQLdb.Error, e:
-            print("MySQL Error: %s" % str(e))
+            logging.error("MySQL Error: %s", str(e))
 
     def get_id(self):
         return self.id

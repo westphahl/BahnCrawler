@@ -1,4 +1,5 @@
 import MySQLdb
+import logging
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
@@ -44,4 +45,4 @@ class Bahnhof(object):
             cursor.close()
             return bahnhof_list
         except MySQLdb.Error, e:
-            print("MySQL Error: %s" % str(e))
+            logging.error("MySQL Error: %s" % str(e))

@@ -1,4 +1,5 @@
 import MySQLdb
+import logging
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
@@ -18,7 +19,7 @@ class Zug(object):
             self.cursor.execute(GET_SQL % (typ, nr))
             self.id, self.typ, self.nr = self.cursor.fetchone()
         except MySQLdb.Error, e:
-            print("MySQL Error: %s" % str(e))
+            logging.error("MySQL Error: %s", str(e))
 
     def get_id(self):
         return self.id

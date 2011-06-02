@@ -1,4 +1,5 @@
 import MySQLdb
+import logging
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
@@ -34,7 +35,7 @@ class Strecke(object):
             cursor.close()
             return strecke
         except MySQLdb.Error, e:
-            print("MySQL Error: %s" % str(e))
+            logging.error("MySQL Error: %s" % str(e))
 
     def get_id(self):
         return self.id

@@ -5,6 +5,7 @@ monkey.patch_all()
 import re
 import logging
 import urllib2
+from string import Template
 from urllib2 import URLError
 from datetime import datetime, date, time
 from BeautifulSoup import BeautifulSoup
@@ -18,20 +19,14 @@ URL-Templage mit GET-Parametern zur Abfrage der Ankuenfte
 
 Query-Parameter (alle zwingend!):
 rt=1                    ->  Funktion unbekannt
-input=%s                ->  UID des Bahnhofs
+input=%s                ->  UNAME des Bahnhofs
 boardType=arr           ->  Ankuenfte anzeigen
 time=actual             ->  momentane Zeit verwenden
 productFilter=11110     ->  Bitmap (1=on/0=off)
                             | ICE | IC/EC | IR/D | NV(RB/RE) | S-Bahn |
 start=yes               ->  Funktion unbekannt
 """
-URL_TEMPLATE = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?" +\
-        "rt=1&" +\
-        "input=%s&" +\
-        "boardType=arr&" +\
-        "time=actual&" +\
-        "productsFilter=11110&" +\
-        "start=yes"
+URL = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?rt=1&input=${uname}&boardType=arr&time=actual&productsFilter=11110&start=yes"
 
 ZUG_REGEX = re.compile(r'\s*(?P<typ>[A-Z]+)\s*(?P<nr>[0-9]+)\s*')
 
@@ -55,7 +50,8 @@ class BhfParser:
         """
         self.bhf = bhf
         # Url aus dem Template erzeugen
-        self.url = URL_TEMPLATE % urllib2.quote(self.bhf.get_uname())
+        self.url = Template(URL).substitute(
+                uname=urllib2.quote(self.bhf.get_uname()))
 
     def __str__(self):
         """
@@ -145,7 +141,7 @@ class BhfParser:
             Rueckgabe einer leeren Ergebnisliste, wenn die Tabelle
             nicht gefunden wurde.
             Dies kann der Fall sein, wenn der Name des Bahnhofs nicht eindeutig
-            ist, oder in der naechsten Zeit keine Ankuenfte vorhanden sind.
+            ist, oder in der naechsten Zeit keine Ankuenfte geplant sind.
             """
             return (datetime.now(), [], [])
 

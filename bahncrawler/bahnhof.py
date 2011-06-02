@@ -1,10 +1,11 @@
 import MySQLdb
 import logging
+from string import Template
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-GET_SQL = "SELECT bid, name, uname FROM " + settings['prefix'] + "Bahnhoefe WHERE sid_fk = %s"
+SELECT = Template("SELECT bid, name, uname FROM ${prefix}Bahnhoefe WHERE sid_fk = ${sid}").safe_substitute(prefix=settings['prefix'])
 
 
 class Bahnhof(object):
@@ -34,8 +35,9 @@ class Bahnhof(object):
     @classmethod
     def get_all_for_strecke(cls, strecke):
         cursor = connection.get_cursor()
+        select_query = Template(SELECT).substitute(sid=long(strecke.get_id()))
         try:
-            cursor.execute(GET_SQL % long(strecke.id))
+            cursor.execute(select_query)
             if cursor.rowcount == 0:
                 bahnhof_list = []
             else:

@@ -23,7 +23,7 @@ class Connection(object):
             logging.error("MySQL Error: %s", str(e))
 
     def __del__(self):
-        if hasattr(self.conf):
+        if hasattr(self, 'con'):
             self.con.close()
 
 

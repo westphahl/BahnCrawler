@@ -1,10 +1,11 @@
 import MySQLdb
 import logging
+from string import Template
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-GET_SQL = "SELECT sid from " + settings['prefix'] + "Strecken WHERE status = 1 ORDER BY erstelltAm DESC LIMIT 1"
+SELECT = Template("SELECT sid from ${prefix}Strecken WHERE status = 1 ORDER BY erstelltAm DESC LIMIT 1").safe_substitute(prefix=settings['prefix'])
 
 
 class Strecke(object):
@@ -27,7 +28,7 @@ class Strecke(object):
     def get_latest_strecke(cls):
         cursor = connection.get_cursor()
         try:
-            cursor.execute(GET_SQL)
+            cursor.execute(SELECT)
             if cursor.rowcount == 0:
                 strecke = None
             else:

@@ -16,6 +16,7 @@ class Connection(object):
                     settings['dbname'])
         except MySQLdb.OperationalError, e:
             logging.error("MySQL Error: %s", str(e))
+            sys.exit(1)
 
     def get_cursor(self):
         try:

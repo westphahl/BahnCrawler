@@ -1,0 +1,5 @@
+# Usage: pip install -f requirements.pip
+BeautifulSoup
+MySQL-python
+gevent
+greenlet

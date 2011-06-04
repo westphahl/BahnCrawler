@@ -13,7 +13,9 @@ class Connection(object):
                     settings['host'],
                     settings['user'],
                     settings['password'],
-                    settings['dbname'])
+                    settings['dbname'],
+                    charset='utf8',
+                    use_unicode=True)
         except MySQLdb.OperationalError, e:
             logging.error("MySQL Error: %s", str(e))
             sys.exit(1)

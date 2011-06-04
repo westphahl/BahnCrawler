@@ -6,7 +6,6 @@ import re
 import logging
 import urllib2
 from string import Template
-from urllib2 import URLError
 from datetime import datetime, date, time
 from BeautifulSoup import BeautifulSoup
 
@@ -28,6 +27,7 @@ start=yes               ->  Funktion unbekannt
 """
 URL = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?rt=1&input=${uname}&boardType=arr&time=actual&productsFilter=11110&start=yes"
 
+# Regular Expression zum Extrahieren des Zugtyp und der Nummer
 ZUG_REGEX = re.compile(r'\s*(?P<typ>[A-Z]+)\s*(?P<nr>[0-9]+)\s*')
 
 
@@ -54,11 +54,7 @@ class BhfParser:
                 uname=urllib2.quote(self.bhf.get_uname()))
 
     def __str__(self):
-        """
-        Methode fuer die Darstellung der Klasse als String.
-        
-        Gibt den Namen des Bahnhofs zurueck
-        """
+        """Methode fuer die Darstellung der Klasse als String."""
         return self.bhf.get_name()
 
     def __call__(self):
@@ -96,7 +92,8 @@ class BhfParser:
                     """
                     # Ankunfszeit des naechsten Zuges
                     next_arrival = ontime[0][0]
-                    sleep_sec = int((next_arrival - current_time).total_seconds())
+                    sleep_sec = self.calculate_delta(current_time, next_arrival)
+                    #sleep_sec = int((next_arrival - current_time).total_seconds())
                     if (sleep_sec < 60):
                         sleep_sec = 60
                 else:
@@ -112,7 +109,7 @@ class BhfParser:
                 gevent.sleep(sleep_sec)
         except GreenletExit:
             return "Exit: %s" % self
-        except URLError:
+        except urllib2.URLError:
             # TODO Streckenstatus auf Fehler setzen
             return "URLError: %s" % self
 
@@ -130,6 +127,10 @@ class BhfParser:
         """
         Methode zum Verarbeiten des HTML-Codes.
 
+        Gibt eine Liste zurueck mit der aktuellen Zeit, verspaetete Ankuenfte
+        und geplante Ankuenfte. Verspaetete und geplante Ankuenfte sind Listen
+        und enthalten den Ankunftszeitpunkt und die Zugdaten.
+        Sind keine Ankuenfte vorhanden, werden leere Listen zurueck gegeben.
         """
         soup = BeautifulSoup(html)
 
@@ -140,7 +141,7 @@ class BhfParser:
             """
             Rueckgabe einer leeren Ergebnisliste, wenn die Tabelle
             nicht gefunden wurde.
-            Dies kann der Fall sein, wenn der Name des Bahnhofs nicht eindeutig
+            Dies kann der Fall sein, wenn der Bahnhof nicht eindeutig
             ist, oder in der naechsten Zeit keine Ankuenfte geplant sind.
             """
             return (datetime.now(), [], [])
@@ -166,16 +167,17 @@ class BhfParser:
             if (row.get('class') == 'current'):
                 """
                 Diese Zeile zeigt die aktuelle Zeit an.
-                Alle nachfolgenden Zeilen sind keine Verspaetungen mehr,
-                darum Flag setzten und die aktuelle Zeit speichern.
+                Alle nachfolgenden Zeilen sind keine Verspaetungen mehr.
                 """
                 late_flag = False
                 current_time = row_time
                 # Mit naechster Zeile fortfahren
                 continue
 
+            # Extrahieren von Zugtyp und Nummer
             match = ZUG_REGEX.search(row('td', 'train')[1].text)
             train_name = (match.group('typ'), match.group('nr'),)
+
             if late_flag:
                 late.append((row_time, train_name))
             else:
@@ -183,30 +185,56 @@ class BhfParser:
         return (current_time, late, ontime)
 
     def process_profileintraege(self, current_time, late, ontime):
+        """
+        Methode zum Verarbeiten der Zuglisten.
+
+        Es werden - falls noch nicht in der Datenbank vorhanden - Zuege,
+        Profileintraege und evtl. Verspaetungen erzeugt und gespeichert.
+        """
         for ankunft, data in ontime[0:5]:
+            # Naechsten fuenf Ankuenfte im Vorraus anlegen
             typ, nr = data
             zug = Zug(typ, nr)
             Profileintrag(self.bhf, zug, ankunft)
 
         for ankunft, data in late:
+            # Alle Verspaetungen anlegen oder aktualisieren
             typ, nr = data
-            delta = int((current_time - ankunft).total_seconds() / 60)
+            delta = self.calculate_delta(current_time, ankunft)
             zug = Zug(typ, nr)
             profil = Profileintrag(self.bhf, zug, ankunft)
             Verspaetung(profil, delta)
 
+    def calculate_delta(self, current_time, train_time):
+        """
+        Methode fuer die Berechnung der Zeit bis zur naechsten Ankunft
+        bzw. der Verspaetung.
+        """
+        if (current_time < train_time):
+            delta = int((train_time - current_time).total_seconds() / 60)
+        else:
+            delta = int((current_time - train_time).total_seconds() / 60)
+        return delta
+
     def log(self, late, current_time, ontime, sleep_sec):
-        logging.info("%s (Arrivals) @ %sh",
+        """Methode fuer die Ausgabe von Debug- und Info-Meldungen."""
+        logging.info("Query \"%s\" (Arrivals) @ %sh",
                 self.bhf.get_name(), current_time.strftime('%H:%M'))
-        logging.debug("Late: %s - On Time: %s - Next query in: %s sec",
+        logging.info("Late: %s - On Time: %s - Next query in: %s sec",
                 len(late), len(ontime), sleep_sec)
+
+        next_arrival = ontime[0][0]
+        next_train = ontime[0][1]
         if (len(ontime) > 0):
-            logging.debug("Next arrival: %s @ %sh - %s min to go",
-                    ontime[0][1],
-                    ontime[0][0].strftime('%H:%M'),
-                    int((ontime[0][0]- current_time).total_seconds() / 60))
+            logging.debug("Next arrival: %s %s @ %sh - %s min to go",
+                    next_train[0],
+                    next_train[1],
+                    next_arrival.strftime('%H:%M'),
+                    self.calculate_delta(current_time, next_arrival))
+
         for arrival, train in late:
-            logging.debug("%s @ %sh - Late: %s min",
-                    train,
+            logging.debug("%s %s @ %sh - Late: %s min",
+                    train[0],
+                    train[1],
                     arrival.strftime('%H:%M'),
-                    int((current_time - arrival).total_seconds() / 60))
+                    self.calculate_delta(current_time, arrival))

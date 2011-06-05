@@ -24,6 +24,12 @@ class Strecke(object):
         else:
             return False
 
+    def __ne__(self, obj):
+        if (isinstance(obj, self.__class__) and (self.id == obj.id)):
+            return False
+        else:
+            return True
+
     @classmethod
     def get_latest_strecke(cls):
         cursor = connection.get_cursor()

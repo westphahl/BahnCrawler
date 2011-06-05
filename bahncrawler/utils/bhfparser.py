@@ -92,8 +92,7 @@ class BhfParser:
                     """
                     # Ankunfszeit des naechsten Zuges
                     next_arrival = ontime[0][0]
-                    sleep_sec = self.calculate_delta(current_time, next_arrival)
-                    #sleep_sec = int((next_arrival - current_time).total_seconds())
+                    sleep_sec = int((next_arrival - current_time).total_seconds())
                     if (sleep_sec < 60):
                         sleep_sec = 60
                 else:

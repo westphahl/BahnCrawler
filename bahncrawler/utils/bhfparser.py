@@ -14,7 +14,7 @@ from bahncrawler.profileintrag import Profileintrag
 from bahncrawler.verspaetung import Verspaetung
 
 """
-URL-Templage mit GET-Parametern zur Abfrage der Ankuenfte
+URL-Template mit GET-Parametern zur Abfrage der Ankuenfte
 
 Query-Parameter (alle zwingend!):
 rt=1                    ->  Funktion unbekannt

@@ -12,8 +12,17 @@ UPDATE = Template("UPDATE ${prefix}Profileintraege SET aktualisiertAm = '${aktua
 
 
 class Profileintrag(object):
+    """Klasse fuer einen Profileintrag des Bahnhofs fuer einen Zug."""
 
     def __init__(self, bahnhof, zug, ankunft):
+        """
+        Initialisierungsmethode fuer einen Profileintrag.
+
+        Wird ein Profileintrag instanziiert, so wird zuerst versucht diesen aus
+        der Datenbank abzufragen. Existiert noch kein passender Eintrag, so
+        wird dieser erzeugt.
+        Jede Instanz eines Profileintrags erhaelt einen eigenen Datebank Cursor.
+        """
         self.cursor = connection.get_cursor()
         now = datetime.now()
         select_query = Template(SELECT).substitute(
@@ -30,6 +39,7 @@ class Profileintrag(object):
                 self.cursor.execute(insert_query)
             else:
                 result = self.cursor.fetchone()
+                # Bearbeitungsdatum aktualisieren
                 update_query = Template(UPDATE).substitute(
                         aktualisiert=now.strftime('%Y-%m-%d %H:%M:%S'),
                         pid=result[0])
@@ -40,7 +50,12 @@ class Profileintrag(object):
             logging.error("MySQL Error: %s", str(e))
 
     def get_id(self):
+        """Get-Methode fuer die ID (Primary Key) des Profileintrags."""
         return self.id
 
     def __del__(self):
+        """
+        Methode fuer das Schliessen des DB Cursors, wenn das Objekt
+        zerstoert wird.
+        """
         self.cursor.close()

@@ -116,7 +116,7 @@ class BhfParser:
         """
         Methode zum Abrufen des HTML-Codes.
 
-        Die Methode oeffnet die fuer den Bahnhof erzeugte URL und
+        Die Methode oeffnet die fuer den Bahnhof erzeugte URL,
         liest den HTML-Code aus und gibt diesen zurueck.
         """
         response = urllib2.urlopen(self.url)

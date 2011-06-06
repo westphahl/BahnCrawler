@@ -27,7 +27,7 @@ class WebCrawler(object):
         Methode zum Ausfuehren des Crawler-Supervisors.
 
         In festen Zeitabstaenden wird die Datenbank auf neue Strecken
-        geprueft und die zugehoerigen Bahnhofsparser gestartet oder
+        geprueft und die zugehoerigen Bahnhofsparser gestartet und
         vorher beendet, falls momentan bereits eine andere Strecke
         bearbeitet wird.
 

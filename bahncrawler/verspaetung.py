@@ -12,8 +12,17 @@ UPDATE = Template("UPDATE ${prefix}Verspaetungen SET minuten = ${minuten} WHERE 
 
 
 class Verspaetung(object):
+    """Klasse Verspaetung fuer einen Profileintrag"""
 
     def __init__(self, profil, minuten):
+        """
+        Initialisierungsmethode fuer ein Verspaetungs-Objekt.
+
+        Die Methode prueft, ob fuer den aktuellen Tag und Profileintrag
+        bereits ein Verspaetungseintrag existiert. Falls vorhanden, wird die
+        Verspaetung (in Minuten) aktualisiert oder andernfalls neu angelegt.
+        Jedes Object erhaelt einen eigenen Datenbank Cursor.
+        """
         self.cursor = connection.get_cursor()
         today = date.today()
         select_query = Template(SELECT).substitute(
@@ -30,12 +39,13 @@ class Verspaetung(object):
         try:
             self.cursor.execute(select_query)
             if self.cursor.rowcount == 0:
+                # keine Verspaetung vorhanden
                 self.cursor.execute(insert_query)
             else:
                 self.cursor.execute(update_query)
-            self.cursor.execute(select_query)
         except MySQLdb.Error, e:
             logging.error("MySQL Error: %s" % str(e))
 
     def __del__(self):
+        """Schliessen des DB Cursors, wenn das Objekt geloescht wird."""
         self.cursor.close()

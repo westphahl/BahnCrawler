@@ -35,10 +35,6 @@ class Bahnhof(object):
         """Get-Methode fuer ID (Primary Key) des Bahnhofs."""
         return self.id
     
-    def get_strecke(self):
-        """Get-Methode fuer die Strecke, welcher der Bahnhof zugeordnet ist."""
-        return self.strecke
-
     @classmethod
     def get_all_for_strecke(cls, strecke):
         """

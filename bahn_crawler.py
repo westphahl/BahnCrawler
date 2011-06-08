@@ -19,13 +19,13 @@ Arguments:
   --db DBNAME, -d DBNAME            Name der zu verwendenden Datenbank
   --interval INTERVAL, -i INTERVAL  Intervall fuer Pruefung auf neue Strecke
   --prefix PREFIX                   Prefix fuer Datenbanktabellen
-  --level {debug,info,warning,error,critical}, -l {debug,info,warning,error,critical}
+  --level {debug,info,warning,error,critical}, -l {...}
                                     Log Level setzen
 """
 
-import sys
-import logging
 import argparse
+import logging
+import sys
 
 from bahncrawler.utils.conf import settings
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--prefix', default='',
             help="Prefix fuer Datenbanktabellen")
     parser.add_argument('--level', '-l', default='info',
-            choices=['debug', 'info', 'warning', 'error', 'critical',],
+            choices=['debug', 'info', 'warning', 'error', 'critical', ],
             help="Log Level setzen")
 
     # Argumente verarbeiten

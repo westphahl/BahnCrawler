@@ -5,7 +5,7 @@ setup(
     console=['bahn_crawler.py'],
     options={
         'py2exe': {
-            'includes': ['greenlet',]
+            'includes': ['greenlet', ]
         }
     }
 )

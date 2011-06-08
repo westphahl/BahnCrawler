@@ -1,11 +1,12 @@
-import MySQLdb
 import logging
+import MySQLdb
 from string import Template
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-SELECT = Template("SELECT bid, name, uname FROM ${prefix}Bahnhoefe WHERE sid_fk = ${sid}").safe_substitute(prefix=settings['prefix'])
+SELECT = Template("SELECT bid, name, uname FROM ${prefix}Bahnhoefe " \
+        "WHERE sid_fk = ${sid}").safe_substitute(prefix=settings['prefix'])
 
 
 class Bahnhof(object):
@@ -34,7 +35,7 @@ class Bahnhof(object):
     def get_id(self):
         """Get-Methode fuer ID (Primary Key) des Bahnhofs."""
         return self.id
-    
+
     @classmethod
     def get_all_for_strecke(cls, strecke):
         """

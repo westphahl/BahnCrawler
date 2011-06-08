@@ -1,6 +1,6 @@
-import sys
 import logging
 import MySQLdb
+import sys
 
 from bahncrawler.utils.conf import settings
 

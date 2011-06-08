@@ -1,14 +1,24 @@
 import logging
+import MySQLdb
 from datetime import datetime
 from string import Template
-import MySQLdb
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-INSERT = Template("INSERT INTO ${prefix}Profileintraege (bid_fk, zid_fk, geplanteAnkunft, erstelltAm, aktualisiertAm, erfassungsZaehler) VALUES (${bid}, ${zid}, '${ankunft}', '${erstellt}', '${aktualisiert}', ${counter})").safe_substitute(prefix=settings['prefix'])
-SELECT = Template("SELECT pid, aktualisiertAm, erfassungsZaehler FROM ${prefix}Profileintraege WHERE bid_fk = ${bid} AND zid_fk = ${zid}").safe_substitute(prefix=settings['prefix'])
-UPDATE = Template("UPDATE ${prefix}Profileintraege SET aktualisiertAm = '${aktualisiert}', erfassungsZaehler = ${counter} WHERE pid = ${pid}").safe_substitute(prefix=settings['prefix'])
+INSERT = Template("INSERT INTO ${prefix}Profileintraege (bid_fk, zid_fk, " \
+        "geplanteAnkunft, erstelltAm, aktualisiertAm, erfassungsZaehler) " \
+        "VALUES (${bid}, ${zid}, '${ankunft}', '${erstellt}', " \
+        "'${aktualisiert}', ${counter})"
+        ).safe_substitute(prefix=settings['prefix'])
+
+SELECT = Template("SELECT pid, aktualisiertAm, erfassungsZaehler FROM " \
+        "${prefix}Profileintraege WHERE bid_fk = ${bid} AND zid_fk = ${zid}"
+        ).safe_substitute(prefix=settings['prefix'])
+
+UPDATE = Template("UPDATE ${prefix}Profileintraege SET aktualisiertAm = " \
+        "'${aktualisiert}', erfassungsZaehler = ${counter} WHERE pid = ${pid}"
+        ).safe_substitute(prefix=settings['prefix'])
 
 
 class Profileintrag(object):
@@ -21,7 +31,7 @@ class Profileintrag(object):
         Wird ein Profileintrag instanziiert, so wird zuerst versucht diesen aus
         der Datenbank abzufragen. Existiert noch kein passender Eintrag, so
         wird dieser erzeugt.
-        Jede Instanz eines Profileintrags erhaelt einen eigenen Datebank Cursor.
+        Jede Instanz eines erhaelt einen eigenen Datebank Cursor.
         """
         self.cursor = connection.get_cursor()
         now = datetime.now()
@@ -37,14 +47,15 @@ class Profileintrag(object):
         try:
             self.cursor.execute(select_query)
             if self.cursor.rowcount == 0:
+                # noch kein Profileintrag vorhanden
                 self.cursor.execute(insert_query)
             else:
+                # Profileintrag aktualisieren
                 result = self.cursor.fetchone()
                 if (now.date() == result[1].date()):
                     counter = result[2]
                 else:
                     counter = result[2] + 1
-                # Bearbeitungsdatum und evtl. Counter aktualisieren
                 update_query = Template(UPDATE).substitute(
                         aktualisiert=now.strftime('%Y-%m-%d %H:%M:%S'),
                         pid=result[0],

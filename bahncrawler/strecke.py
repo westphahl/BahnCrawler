@@ -1,11 +1,13 @@
-import MySQLdb
 import logging
+import MySQLdb
 from string import Template
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-SELECT = Template("SELECT sid from ${prefix}Strecken WHERE status = 1 ORDER BY erstelltAm DESC LIMIT 1").safe_substitute(prefix=settings['prefix'])
+SELECT = Template("SELECT sid from ${prefix}Strecken WHERE status = 1 " \
+        "ORDER BY erstelltAm DESC LIMIT 1"
+        ).safe_substitute(prefix=settings['prefix'])
 
 
 class Strecke(object):

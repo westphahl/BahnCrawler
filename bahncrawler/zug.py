@@ -1,12 +1,16 @@
-import MySQLdb
 import logging
+import MySQLdb
 from string import Template
 
 from bahncrawler.utils.conf import settings
 from bahncrawler.utils.db import connection
 
-INSERT = Template("INSERT INTO ${prefix}Zuege (typ, nummer) VALUES ('${typ}', '${nummer}')").safe_substitute(prefix=settings['prefix'])
-SELECT = Template("SELECT zid, typ, nummer FROM ${prefix}Zuege WHERE typ = '${typ}' AND nummer = '${nummer}'").safe_substitute(prefix=settings['prefix'])
+INSERT = Template("INSERT INTO ${prefix}Zuege (typ, nummer) VALUES " \
+        "('${typ}', '${nummer}')").safe_substitute(prefix=settings['prefix'])
+
+SELECT = Template("SELECT zid, typ, nummer FROM ${prefix}Zuege WHERE " \
+        "typ = '${typ}' AND nummer = '${nummer}'"
+        ).safe_substitute(prefix=settings['prefix'])
 
 
 class Zug(object):

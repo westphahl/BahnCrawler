@@ -1,10 +1,11 @@
 import gevent
 from gevent import monkey
 monkey.patch_all()
+
 import logging
 
-from bahncrawler.strecke import Strecke
 from bahncrawler.bahnhof import Bahnhof
+from bahncrawler.strecke import Strecke
 from bahncrawler.utils.bhfparser import BhfParser
 from bahncrawler.utils.conf import settings
 

@@ -2,16 +2,16 @@ import gevent
 from gevent import monkey, GreenletExit
 monkey.patch_all()
 
-import re
 import logging
+import re
 import urllib2
-from string import Template
-from datetime import datetime, date, time
 from BeautifulSoup import BeautifulSoup
+from datetime import datetime, date, time
+from string import Template
 
-from bahncrawler.zug import Zug
 from bahncrawler.profileintrag import Profileintrag
 from bahncrawler.verspaetung import Verspaetung
+from bahncrawler.zug import Zug
 
 """
 URL-Template mit GET-Parametern zur Abfrage der Ankuenfte
@@ -25,7 +25,13 @@ productFilter=11110     ->  Bitmap (1=on/0=off)
                             | ICE | IC/EC | IR/D | NV(RB/RE) | S-Bahn |
 start=yes               ->  Funktion unbekannt
 """
-URL = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?rt=1&input=${uname}&boardType=arr&time=actual&productsFilter=11110&start=yes"
+URL = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?" \
+      "rt=1&" \
+      "input=${uname}&" \
+      "boardType=arr&" \
+      "time=actual&" \
+      "productsFilter=11110&" \
+      "start=yes"
 
 # Regular Expression zum Extrahieren des Zugtyp und der Nummer
 ZUG_REGEX = re.compile(r'\s*(?P<typ>[A-Z]+)\s*(?P<nr>[0-9]+)\s*')
@@ -65,9 +71,8 @@ class BhfParser:
         Die Methode ist fuer die regelmaessige Ueberpruefung der Bahn-
         hofsseite verantwortlich. Die Pruefung wird in einer Schleife
         ausgefuehrt, wobei der Thread bis zur naechsten Zugankunft
-        wartet (sleep).
-        In der Endlosschleife wird auch die Berechnung der der Zeit bis
-        zur naechsten Abfrage berechnet.
+        wartet (sleep). In der Endlosschleife wird auch die Berechnung
+        der der Zeit bis zur naechsten Abfrage berechnet.
         Wird der Thread beendet, so wird die Exception 'GreenletExit'
         erzeugt und eine Statusmeldung zurueck gegeben.
         """
@@ -78,8 +83,8 @@ class BhfParser:
 
                 if (len(late) > 0):
                     """
-                    Abfrage in 60s, wenn Verspaetungen vorhanden, da Verspaetungen
-                    jederzeit verschwinden koennen.
+                    Abfrage in 60s, wenn Verspaetungen vorhanden, da
+                    Verspaetungen jederzeit verschwinden koennen.
                     Dieses Intervall bestimmt die maximale Genauigkeit mit der
                     Verspaetungen erfasst werden koennen.
                     """
@@ -92,7 +97,8 @@ class BhfParser:
                     """
                     # Ankunfszeit des naechsten Zuges
                     next_arrival = ontime[0][0]
-                    sleep_sec = int((next_arrival - current_time).total_seconds())
+                    sleep_sec = int(
+                            (next_arrival - current_time).total_seconds())
                     if (sleep_sec < 60):
                         sleep_sec = 60
                 else:
@@ -100,9 +106,9 @@ class BhfParser:
                     Wenn keine Verspaetungen vorhanden und keine Ankuenfte
                     geplant sind, erfolgt das Polling im 60 Minuten Takt.
                     """
-                    sleep_sec = 60*60
+                    sleep_sec = 60 * 60
 
-                self.log(late, current_time, ontime, sleep_sec)
+                self.log_query(late, current_time, ontime, sleep_sec)
                 self.process_profileintraege(current_time, late, ontime)
 
                 gevent.sleep(sleep_sec)
@@ -215,7 +221,7 @@ class BhfParser:
             delta = int((current_time - train_time).total_seconds() / 60)
         return delta
 
-    def log(self, late, current_time, ontime, sleep_sec):
+    def log_query(self, late, current_time, ontime, sleep_sec):
         """Methode fuer die Ausgabe von Debug- und Info-Meldungen."""
         logging.info("Query \"%s\" (Arrivals) @ %sh",
                 self.bhf.get_name(), current_time.strftime('%H:%M'))

@@ -1,8 +1,16 @@
 from distutils.core import setup
-import py2exe
+try:
+    import py2exe
+except ImportError:
+    pass
 
 setup(
-    console=['bahn_crawler.py'],
+    name="BahnCrawler",
+    author="Simon Westphahl",
+    author_email="westphahl@gmail.com",
+    packages=['bahncrawler', 'bahncrawler.utils'],
+    scripts=['bahn_crawler.py'],
+    console=['bahn_crawler.py'], # py2exe
     options={
         'py2exe': {
             'includes': ['greenlet', ]

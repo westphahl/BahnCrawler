@@ -19,19 +19,20 @@ UPDATE = Template("UPDATE ${prefix}Verspaetungen SET minuten = ${minuten} " \
         ).safe_substitute(prefix=settings['prefix'])
 
 
+## Klasse Verspaetung fuer einen Profileintrag
 class Verspaetung(object):
-    """Klasse Verspaetung fuer einen Profileintrag"""
 
+    ## Initialisierungsmethode fuer ein Verspaetungs-Objekt.
+    #
+    # Die Methode prueft, ob fuer den aktuellen Tag und Profileintrag
+    # bereits ein Verspaetungseintrag existiert. Falls vorhanden, wird die
+    # Verspaetung (in Minuten) aktualisiert oder andernfalls neu angelegt.
+    # Jedes Object erhaelt einen eigenen Datenbank Cursor.
+    #
+    # \param[in] profil     Profil-Objekt fuer die Verspaetung
+    # \param[in] minuten    Verspaetung fuer den Profileintrag
     def __init__(self, profil, minuten):
-        """
-        Initialisierungsmethode fuer ein Verspaetungs-Objekt.
-
-        Die Methode prueft, ob fuer den aktuellen Tag und Profileintrag
-        bereits ein Verspaetungseintrag existiert. Falls vorhanden, wird die
-        Verspaetung (in Minuten) aktualisiert oder andernfalls neu angelegt.
-        Jedes Object erhaelt einen eigenen Datenbank Cursor.
-        """
-        self.cursor = connection.get_cursor()
+        self._cursor = connection.get_cursor()
         today = date.today()
         select_query = Template(SELECT).substitute(
                 pid=profil.get_id(),
@@ -45,15 +46,15 @@ class Verspaetung(object):
                 pid=profil.get_id(),
                 datum=today.isoformat())
         try:
-            self.cursor.execute(select_query)
-            if self.cursor.rowcount == 0:
+            self._cursor.execute(select_query)
+            if self._cursor.rowcount == 0:
                 # keine Verspaetung vorhanden
-                self.cursor.execute(insert_query)
+                self._cursor.execute(insert_query)
             else:
-                self.cursor.execute(update_query)
+                self._cursor.execute(update_query)
         except MySQLdb.Error, e:
             logging.error("MySQL Error: %s" % str(e))
 
+    ## Schliessen des DB Cursors, wenn das Objekt geloescht wird.
     def __del__(self):
-        """Schliessen des DB Cursors, wenn das Objekt geloescht wird."""
-        self.cursor.close()
+        self._cursor.close()

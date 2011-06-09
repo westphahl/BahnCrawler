@@ -9,42 +9,54 @@ SELECT = Template("SELECT bid, name, uname FROM ${prefix}Bahnhoefe " \
         "WHERE sid_fk = ${sid}").safe_substitute(prefix=settings['prefix'])
 
 
+## Bahnhofsklasse fuer Zugriff auf DB-Tabelle.
 class Bahnhof(object):
-    """Bahnhofsklasse fuer Zugriff auf DB-Tabelle."""
 
+    ## Initialisierungsmethode fuer einen Bahnhof.
+    #
+    # Bei Instanziierung eines Bahnhofs-Objektes wird kein Eintrag
+    # in der Datenbank erzeugt.
+    #
+    # \param[in] id         Id des Bahnhofs
+    # \param[in] name       Name des Bahnhofs
+    # \param[in] uname      Eindeutiger Name des Bahnhofs
+    # \param[in] strecke    Strecken-Objekt fuer die Zuordnung
     def __init__(self, id, name, uname, strecke):
-        """
-        Initialisierungsmethode fuer einen Bahnhof.
+        self._id = id
+        self._name = name
+        self._uname = uname
+        self._strecke = strecke
 
-        Bei Instanziierung eines Bahnhofs-Objektes wird kein Eintrag
-        in der Datenbank erzeugt.
-        """
-        self.id = id
-        self.name = name
-        self.uname = uname
-        self.strecke = strecke
-
+    ## Get-Methode fuer Namen des Bahnhofs.
+    #
+    # \return   Name des Bahnhofs
     def get_name(self):
-        """Get-Methode fuer Namen des Bahnhofs."""
-        return self.name
+        return self._name
 
+    ## Get-Methode fuer "Unique Name" des Bahnhofs.
+    #
+    # \return   Eindeutiger Name des Bahnhofs
     def get_uname(self):
-        """Get-Methode fuer "Unique Name" des Bahnhofs."""
-        return self.uname
+        return self._uname
 
+    ## Get-Methode fuer ID (Primary Key) des Bahnhofs.
+    #
+    # \return   Id des Bahnhofs (Integer)
     def get_id(self):
-        """Get-Methode fuer ID (Primary Key) des Bahnhofs."""
-        return self.id
+        return self._id
 
+    ## Klassenmethod um alle Bahnhoefe einer bestimmten Strecke aus der
+    ## Datenbank auszulesen.
+    #
+    # Die Methode bekommt ein Streckenobjekt uebergeben und liefert eine
+    # Liste mit Bahnhofs-Objekten zurueck.
+    #
+    # \param[in] strecke    Strecken-Object fuer welchen Bahnhoefe
+    #                       abgefragt werden
+    #
+    # \return               Liste von Bahnhofs-Objekten
     @classmethod
     def get_all_for_strecke(cls, strecke):
-        """
-        Klassenmethod um alle Bahnhoefe einer bestimmten Strecke aus der
-        Datenbank auszulesen.
-
-        Die Methode bekommt ein Streckenobjekt uebergeben und liefert eine
-        Liste mit Bahnhofs-Objekten zurueck.
-        """
         cursor = connection.get_cursor()
         select_query = Template(SELECT).substitute(sid=long(strecke.get_id()))
         try:

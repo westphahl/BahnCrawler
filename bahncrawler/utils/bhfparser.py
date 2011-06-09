@@ -37,45 +37,45 @@ URL = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?" \
 ZUG_REGEX = re.compile(r'\s*(?P<typ>[A-Z]+)\s*(?P<nr>[0-9]+)\s*')
 
 
+## Parser-Klasse fuer einen Bahnhof.
+#
+# Es wird fuer jeden Bahnhof ein eigener Bahnhof-Parser erstellt,
+# welcher in bestimmten Abstaenden die Ankunfseite des Bahnhofs
+# ueberprueft, analysiert und Zuege, Profileintraege sowie
+# Verspaetungen erfasst und speichert.
 class BhfParser:
-    """
-    Parser-Klasse fuer einen Bahnhof.
 
-    Es wird fuer jeden Bahnhof ein eigener Bahnhof-Parser erstellt,
-    welcher in bestimmten Abstaenden die Ankunfseite des Bahnhofs
-    ueberprueft, analysiert und Zuege, Profileintraege sowie
-    Verspaetungen erfasst und speichert.
-    """
-
+    ## Initialisierungsmethode des Bahnhof-Parsers
+    #
+    # Bekommt eine Instanz eines Bahnhof-Objekts uebergeben und
+    # erzeugt aus dem URL-Template eine URL fuer den Bahnhof.
+    #
+    # \param[in] bhf    Bahnhofs-Object fuer den Parser
     def __init__(self, bhf):
-        """
-        Initialisierungsmethode des Bahnhof-Parsers
-
-        Bekommt eine Instanz eines Bahnhof-Objekts uebergeben und
-        erzeugt aus dem URL-Template eine URL fuer den Bahnhof.
-        """
         self.bhf = bhf
         # Url aus dem Template erzeugen
         self.url = Template(URL).substitute(
                 uname=urllib2.quote(self.bhf.get_uname()))
 
+    ## Methode fuer die Darstellung der Klasse als String.
+    #
+    # \return   Name des Bahnhofs
     def __str__(self):
-        """Methode fuer die Darstellung der Klasse als String."""
         return self.bhf.get_name()
 
+    ## Methode welcher beim Aufruf einer Klassen-Instanz als Methode
+    ## ausgefuehrt wird.
+    #
+    # Die Methode ist fuer die regelmaessige Ueberpruefung der Bahn-
+    # hofsseite verantwortlich. Die Pruefung wird in einer Schleife
+    # ausgefuehrt, wobei der Thread bis zur naechsten Zugankunft
+    # wartet (sleep). In der Endlosschleife wird auch die Berechnung
+    # der der Zeit bis zur naechsten Abfrage berechnet.
+    # Wird der Thread beendet, so wird die Exception 'GreenletExit'
+    # erzeugt und eine Statusmeldung zurueck gegeben.
+    #
+    # \return   Statusmeldung des Greenlets (Threads)
     def __call__(self):
-        """
-        Methode welcher beim Aufruf einer Klassen-Instanz als Methode
-        ausgefuehrt wird.
-
-        Die Methode ist fuer die regelmaessige Ueberpruefung der Bahn-
-        hofsseite verantwortlich. Die Pruefung wird in einer Schleife
-        ausgefuehrt, wobei der Thread bis zur naechsten Zugankunft
-        wartet (sleep). In der Endlosschleife wird auch die Berechnung
-        der der Zeit bis zur naechsten Abfrage berechnet.
-        Wird der Thread beendet, so wird die Exception 'GreenletExit'
-        erzeugt und eine Statusmeldung zurueck gegeben.
-        """
         try:
             while True:
                 html = self.get_html()
@@ -118,25 +118,29 @@ class BhfParser:
             # TODO Streckenstatus auf Fehler setzen
             return "URLError: %s" % self
 
+    ## Methode zum Abrufen des HTML-Codes.
+    #
+    # Die Methode oeffnet die fuer den Bahnhof erzeugte URL,
+    # liest den HTML-Code aus und gibt diesen zurueck.
+    #
+    # \return   HTML-Code der Bahnhofs-Seite
     def get_html(self):
-        """
-        Methode zum Abrufen des HTML-Codes.
-
-        Die Methode oeffnet die fuer den Bahnhof erzeugte URL,
-        liest den HTML-Code aus und gibt diesen zurueck.
-        """
         response = urllib2.urlopen(self.url)
         return response.read()
 
+    ## Methode zum Verarbeiten des HTML-Codes.
+    #
+    # Gibt eine Liste zurueck mit der aktuellen Zeit, verspaetete Ankuenfte
+    # und geplante Ankuenfte. Verspaetete und geplante Ankuenfte sind Listen
+    # und enthalten den Ankunftszeitpunkt und die Zugdaten.
+    # Sind keine Ankuenfte vorhanden, werden leere Listen zurueck gegeben.
+    #
+    # \param[in] html   HTML-Code der Bahnhofs-Seite
+    #
+    # \return           Tupel mit: (aktuelle Zeit,
+    #                               geplante Ankuenfte,
+    #                               Verspaetungen)
     def parse_html(self, html):
-        """
-        Methode zum Verarbeiten des HTML-Codes.
-
-        Gibt eine Liste zurueck mit der aktuellen Zeit, verspaetete Ankuenfte
-        und geplante Ankuenfte. Verspaetete und geplante Ankuenfte sind Listen
-        und enthalten den Ankunftszeitpunkt und die Zugdaten.
-        Sind keine Ankuenfte vorhanden, werden leere Listen zurueck gegeben.
-        """
         soup = BeautifulSoup(html)
 
         # Suche der Ankunfstabelle
@@ -189,13 +193,15 @@ class BhfParser:
                 ontime.append((row_time, train_name))
         return (current_time, late, ontime)
 
+    ## Methode zum Verarbeiten der Zuglisten.
+    #
+    # Es werden - falls noch nicht in der Datenbank vorhanden - Zuege,
+    # Profileintraege und evtl. Verspaetungen erzeugt und gespeichert.
+    #
+    # \param[in] current_time   Datetime-Object mit der aktuellen Zeit
+    # \param[in] late           Liste mit geplanten Ankuenften (String)
+    # \param[in] ontime         Liste mit Verspaetungen (String)
     def process_profileintraege(self, current_time, late, ontime):
-        """
-        Methode zum Verarbeiten der Zuglisten.
-
-        Es werden - falls noch nicht in der Datenbank vorhanden - Zuege,
-        Profileintraege und evtl. Verspaetungen erzeugt und gespeichert.
-        """
         for ankunft, data in ontime[0:5]:
             # Naechsten fuenf Ankuenfte im Vorraus anlegen
             typ, nr = data
@@ -210,19 +216,27 @@ class BhfParser:
             profil = Profileintrag(self.bhf, zug, ankunft)
             Verspaetung(profil, delta)
 
+    ## Methode fuer die Berechnung der Zeit bis zur naechsten Ankunft
+    ## bzw. der Verspaetung.
+    #
+    # \param[in] current_time   Datetime-Objekt mit der aktuellen Zeit
+    # \param[in] train_time     Datetime-Objekt mit der Ankunftszeit eines Zuges
+    #
+    # \return                   Zeitdifferenz in Minuten (Betrag)
     def calculate_delta(self, current_time, train_time):
-        """
-        Methode fuer die Berechnung der Zeit bis zur naechsten Ankunft
-        bzw. der Verspaetung.
-        """
         if (current_time < train_time):
             delta = int((train_time - current_time).total_seconds() / 60)
         else:
             delta = int((current_time - train_time).total_seconds() / 60)
         return delta
 
+    ## Methode fuer die Ausgabe von Debug- und Info-Meldungen.
+    #
+    # \param[in] late           Liste mit Verspaetungen (String)
+    # \param[in] current_time   Datetime-Objekt mit der aktuellen Zeit
+    # \param[in] ontime         Liste mit geplanten Ankuenften (String)
+    # \param[in] sleep_sec      Sekunden bis zur naechsten Abfrage
     def log_query(self, late, current_time, ontime, sleep_sec):
-        """Methode fuer die Ausgabe von Debug- und Info-Meldungen."""
         logging.info("Query \"%s\" (Arrivals) @ %sh",
                 self.bhf.get_name(), current_time.strftime('%H:%M'))
         logging.info("Late: %s - On Time: %s - Next query in: %s sec",

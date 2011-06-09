@@ -5,18 +5,16 @@ import sys
 from bahncrawler.utils.conf import settings
 
 
+## Klasse fuer Verbindung zur MySQL-Datenbank.
 class Connection(object):
-    """Klasse fuer Verbindung zur MySQL-Datenbank."""
 
+    ## Initialisierungsmethode fuer eine neue Datenbankverbindung.
+    #
+    # Es wird versucht eine Verbindung mit der Datenbank herzustellen.
+    # Gelingt dies nicht, wird das Programm beendet.
     def __init__(self):
-        """
-        Initialisierungsmethode fuer eine neue Datenbankverbindung.
-
-        Es wird versucht eine Verbindung mit der Datenbank herzustellen.
-        Gelingt dies nicht, wird das Programm beendet.
-        """
         try:
-            self.con = MySQLdb.connect(
+            self._con = MySQLdb.connect(
                     settings['host'],
                     settings['user'],
                     settings['password'],
@@ -27,27 +25,25 @@ class Connection(object):
             logging.error("MySQL Error: %s", str(e))
             sys.exit(1)
 
+    ## Methode um einen neuen Cursor fuer die Datenbank zu erhalten.
+    #
+    # Liefert als Rueckgabewert einen neuen Datenbank-Cursor, mit welchem
+    # Abfragen ausgefuehrt werden koennen. Ist keine Datenbankverbindun
+    # vorhanden wird das Programm beendet.
+    #
+    # \return   Datenbank Cursor
     def get_cursor(self):
-        """
-        Methode um einen neuen Cursor fuer die Datenbank zu erhalten.
-
-        Liefert als Rueckgabewert einen neuen Datenbank-Cursor, mit welchem
-        Abfragen ausgefuehrt werden koennen. Ist keine Datenbankverbindun
-        vorhanden wird das Programm beendet.
-        """
         try:
-            return self.con.cursor()
+            return self._con.cursor()
         except MySQLdb.OperationalError, e:
             logging.error("MySQL Error: %s", str(e))
             sys.exit(1)
 
+    ## Methode zum Schliessen der Datenbankverbindung, wenn das Objekt
+    ## bei Programmende geloescht wird.
     def __del__(self):
-        """
-        Methode zum Schliessen der Datenbankverbindung, wenn das Objekt
-        bei Programmende geloescht wird.
-        """
-        if hasattr(self, 'con'):
-            self.con.close()
+        if hasattr(self, '_con'):
+            self._con.close()
 
 
 # Globale Datenbankverbindung erzeugen

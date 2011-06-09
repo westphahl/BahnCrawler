@@ -21,18 +21,20 @@ UPDATE = Template("UPDATE ${prefix}Profileintraege SET aktualisiertAm = " \
         ).safe_substitute(prefix=settings['prefix'])
 
 
+## Klasse Profileintrag fuer einen Zug an einem Bahnhof
 class Profileintrag(object):
-    """Klasse fuer einen Profileintrag des Bahnhofs fuer einen Zug."""
 
+    ## Initialisierungsmethode fuer einen Profileintrag.
+    #
+    # Wird ein Profileintrag instanziiert, so wird zuerst versucht diesen aus
+    # der Datenbank abzufragen. Existiert noch kein passender Eintrag, so
+    # wird dieser erzeugt.
+    # Jede Instanz eines erhaelt einen eigenen Datebank Cursor.
+    #
+    # \param[in] bahnhof    Bahnhofs-Objekt fuer die Zuordnung
+    # \param[in] zug        Zug-Object fuer die Zuordnung
+    # \param[in] ankunft    Ankunfszeit fuer einen Zug am Bahnhof
     def __init__(self, bahnhof, zug, ankunft):
-        """
-        Initialisierungsmethode fuer einen Profileintrag.
-
-        Wird ein Profileintrag instanziiert, so wird zuerst versucht diesen aus
-        der Datenbank abzufragen. Existiert noch kein passender Eintrag, so
-        wird dieser erzeugt.
-        Jede Instanz eines erhaelt einen eigenen Datebank Cursor.
-        """
         self.cursor = connection.get_cursor()
         now = datetime.now()
         select_query = Template(SELECT).substitute(

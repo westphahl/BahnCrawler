@@ -10,34 +10,39 @@ SELECT = Template("SELECT sid from ${prefix}Strecken WHERE status = 1 " \
         ).safe_substitute(prefix=settings['prefix'])
 
 
+## Streckenklasse fuer Zugriff auf Datenbanktabelle.
 class Strecke(object):
-    """Streckenklasse fuer Zugriff auf Datenbanktabelle."""
 
+    ## Initialisierungsmethode fuer ein Strecken-Objekt
     def __init__(self, id):
-        self.status_code = 1
-        self.id = id
+        self._status_code = 1
+        self._id = id
 
+    ## Methode fuer "==" (equal) Vergleiche.
+    #
+    # \param[in] obj    Zu vergleichendes Objekt
+    # \return           Boolscher Wert als Ergebnis des Vergleichs
     def __eq__(self, obj):
-        """Methode fuer "==" (equal) Vergleiche."""
-        if (isinstance(obj, self.__class__) and (self.id == obj.id)):
+        if (isinstance(obj, self.__class__) and (self._id == obj.get_id())):
             return True
         else:
             return False
 
+    ## Methode fuer "!=" (not equal) Vergleiche.
+    #
+    # \param[in] obj    Zu vergleichendes Objekt
+    # \return           Boolscher Wert als Ergebnis des Vergleichs
     def __ne__(self, obj):
-        """Methode fuer "!=" (not equal) Vergleiche."""
-        if (isinstance(obj, self.__class__) and (self.id == obj.id)):
+        if (isinstance(obj, self.__class__) and (self._id == obj.get_id())):
             return False
         else:
             return True
 
+    ## Klassenmethode um die neuste Strecke aus der Datenbank abzufragen.
+    # 
+    # \return   Strecken-Objekt fuer neuste Strecke aus der Datenbank
     @classmethod
     def get_latest_strecke(cls):
-        """
-        Klassenmethode um die neuste Strecke aus der Datenbank abzufragen.
-
-        Die Methode gibt ein Strecken-Objekt zurueck.
-        """
         cursor = connection.get_cursor()
         try:
             cursor.execute(SELECT)
@@ -51,19 +56,22 @@ class Strecke(object):
         except MySQLdb.Error, e:
             logging.error("MySQL Error: %s" % str(e))
 
+    ## Get-Methode fuer ID der Strecke.
+    #
+    # \return   ID der Strecke (Integer)
     def get_id(self):
-        """Get-Methode fuer ID (Primary Key) der Strecke."""
-        return self.id
+        return self._id
 
+    ## Set-Method um Status der Strecke zu setzen.
+    #
+    # \param[in] code       Status Code fuer die Strecke
+    #       Gueltige Status-Codes:
+    #           0 = nicht bearbeitet (d.h. noch keine Bahnhoefe angelegt)
+    #           1 = ok
+    #           2 = fehlerhaft
+    # \param[in] message    Fehlermeldung fuer den gesetzten Status
+    #
     def set_status(self, code, message):
-        """
-        Set-Method um Status der Strecke zu setzen.
-
-        Gueltige Status-Codes:
-            0 = nicht bearbeitet (d.h. noch keine Bahnhoefe angelegt)
-            1 = ok
-            2 = fehlerhaft
-        """
         # TODO Status in Datenbank schreiben
-        self.status_code = code
-        self.status_message = message
+        self._status_code = code
+        self._status_message = message

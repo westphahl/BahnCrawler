@@ -34,7 +34,7 @@ URL = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?" \
       "start=yes"
 
 # Regular Expression zum Extrahieren des Zugtyp und der Nummer
-ZUG_REGEX = re.compile(r'\s*(?P<typ>[A-Z]+)\s*(?P<nr>[0-9]+)\s*')
+ZUG_REGEX = re.compile(r'\s*(?P<typ>[A-Za-z]+)\s*(?P<nr>[0-9]+)\s*')
 
 
 ## Parser-Klasse fuer einen Bahnhof.
@@ -142,7 +142,7 @@ class BhfParser:
     #                               Verspaetungen)
     def parse_html(self, html):
         soup = BeautifulSoup(html)
-
+        current_time = datetime.now()
         # Suche der Ankunfstabelle
         table = soup.find('table', 'result')
 
@@ -153,7 +153,7 @@ class BhfParser:
             Dies kann der Fall sein, wenn der Bahnhof nicht eindeutig
             ist, oder in der naechsten Zeit keine Ankuenfte geplant sind.
             """
-            return (datetime.now(), [], [])
+            return (current_time, [], [])
 
         # Alle Zeilen heraussuchen
         rows_raw = table.findAll('tr')
@@ -184,8 +184,11 @@ class BhfParser:
                 continue
 
             # Extrahieren von Zugtyp und Nummer
-            match = ZUG_REGEX.search(row('td', 'train')[1].text)
-            train_name = (match.group('typ'), match.group('nr'),)
+            try:
+                match = ZUG_REGEX.search(row('td', 'train')[1].text)
+                train_name = (match.group('typ'), match.group('nr'),)
+            except AttributeError:
+                continue
 
             if late_flag:
                 late.append((row_time, train_name))
@@ -242,9 +245,9 @@ class BhfParser:
         logging.info("Late: %s - On Time: %s - Next query in: %s sec",
                 len(late), len(ontime), sleep_sec)
 
-        next_arrival = ontime[0][0]
-        next_train = ontime[0][1]
         if (len(ontime) > 0):
+            next_arrival = ontime[0][0]
+            next_train = ontime[0][1]
             logging.debug("Next arrival: %s %s @ %sh - %s min to go",
                     next_train[0],
                     next_train[1],

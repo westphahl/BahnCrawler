@@ -1,7 +1,11 @@
 Bahn Crawler
 ============
 
-WebCrawler zum Erfassen von Verspätungen der Bahn.
+Praktikum Software-Engineering @ HS Ravensburg-Weingarten.
+Projekt: Verspätungsstatistiken auf Strecken der Deutschen Bahn
+Teilprojekt: WebCrawler zum Erfassen der Verspätungen
+
+Hinweis: Um die Dokumentation für das gesamte Projekt einheitlich erstellen zu können, wurden Doxygen-Kommentarte anstelle von Python-Docstrings verwendet.
 
 EXE-Datei erstellen (Windows)
 -----------------------------

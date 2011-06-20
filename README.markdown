@@ -12,8 +12,8 @@ EXE-Datei erstellen (Windows)
 
     $ python setup.py py2exe
 
-Commandozeilen-Parameter
-------------------------
+Verwendung des WebCrawlers
+--------------------------
 
     usage: bahn_crawler.py [-h] [--host HOST] [--port PORT] --user USER --password
                            PASSWORD --db DBNAME [--interval INTERVAL]

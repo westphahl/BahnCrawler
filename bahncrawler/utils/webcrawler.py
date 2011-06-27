@@ -43,6 +43,9 @@ class WebCrawler(object):
                     self.quit_all_parsers()
                     self._active_strecke = self._current_strecke
                     self.start_all_parsers()
+                elif not self.check_all_parsers():
+                    self.quit_all_parsers()
+                    self.start_all_parsers()
                 gevent.sleep(self._interval)
                 logging.info("Suche nach neuer Strecke")
                 self._current_strecke = Strecke.get_latest_strecke()
@@ -64,6 +67,22 @@ class WebCrawler(object):
         parser_list = [BhfParser(bhf) for bhf in bhf_list]
         # Jeden Parser in eigenem Thread ausfuehren
         self._jobs = [gevent.spawn(parser) for parser in parser_list]
+
+    ## Methode zum Pruefen der Bahnhofsparser
+    #
+    # Es wird fuer jeden Parser geprueft, ob dieser sich unerwartet beendet
+    # hat. Dies kann evtl. vorkommen, wenn die Bahn-Seite nicht verfuegbar ist.
+    #
+    # \return           Boolscher Wert ob alle Parser aktiv sind
+    def check_all_parsers(self):
+        if self._active_strecke == None:
+            return
+        logging.info("Pruefe alle Parser")
+        for job in self._jobs:
+            if job.ready():
+                logging.warning("Parser wurde unerwartete beendet")
+                return False
+        return True
 
     ## Methode zum Beenden der Banhofsparser.
     def quit_all_parsers(self):

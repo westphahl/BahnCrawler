@@ -41,7 +41,7 @@ if __name__ == '__main__':
             help="MySQL Port (default: 3306)")
     parser.add_argument('--user', '-u', required=True,
             help="Benutzername fuer Datenbankverbindung")
-    parser.add_argument('--password', '-p', required=True,
+    parser.add_argument('--password', '-p', default='',
             help="Passwort fuer Datenbankverbindung")
     parser.add_argument('--db', '-d', required=True, dest='dbname',
             help="Name der zu verwendenden Datenbank")
